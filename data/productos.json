@@ -1,0 +1,5 @@
+[
+    {"id": 1, "nombre": "Perfume", "precio": 12000},
+    {"id": 2, "nombre": "Crema corporal", "precio": 4500},
+    {"id": 3, "nombre": "Jabón artesanal", "precio": 2500}
+]

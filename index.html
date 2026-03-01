@@ -1,15 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><!--Caracteres codificados---------------------------->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"><!--Diseño responsivo-->
     <title>Tienda Araperful</title>
-    
+    <!--CSS-------------------------------->
     <link rel="stylesheet" href="css/style.css">
-
+    <!--Fuentes------------------------------------>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <!--Librerias------------------------------------------------------->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script><!--Libreria para Alertas-->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script><!--Libreria para Notificaciones-->
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script><!--Libreria para manejo de Fechas-->
 </head>
 
 <body>
@@ -26,17 +31,16 @@
         <section id="contenedor-productos"></section>
 
         <hr>
-
+         <!--Carrito---------------->
         <section id="carrito">
             <h2>Tu Carrito</h2>
             <ul id="lista-carrito"></ul>
             <p><strong>Total: $</strong><span id="total-precio">0</span></p>
-            
+            <!--Botones---------------------->
             <button id="btn-vaciar">Vaciar Carrito</button>
             <button id="btn-finalizar">Finalizar Compra</button>
-            
             <button id="btn-pagar">Pagar</button>
-
+            <!-- Opciones de pago dinámicas (se muestran desde JS al finalizar compra) -->
             <div id="opciones-pago" style="display: none; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px;">
                 <h3>Seleccione método de pago:</h3>
                 <label>

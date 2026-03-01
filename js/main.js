@@ -1,7 +1,7 @@
 // ==========================================
 // Simulador interactivo: ARAPERFUL
-// Entrega 2 - Curso JavaScript
-// Enfoque: DOM, Eventos y Storage
+// Entrega Final - Curso JavaScript
+// Enfoque: DOM, Eventos, Storage y Librerías
 // ==========================================
 
 // 1. Clase para estandarizar productos
@@ -13,14 +13,29 @@ class Producto {
     }
 }
 
-// 2. Base de datos de productos
-const productos = [
-    new Producto(1, "Perfume", 12000),
-    new Producto(2, "Crema corporal", 4500),
-    new Producto(3, "Jabón artesanal", 2500)
-];
+// Uso de Luxon
+const { DateTime } = luxon;
 
-// 3. Inicialización del carrito (Uso de Storage y JSON)
+// 2. Base de datos de productos
+let productos = [];
+
+// Fetch asincrónico de productos
+fetch("data/productos.json")
+    .then(response => response.json())
+    .then(data => {
+        productos = data.map(p => new Producto(p.id, p.nombre, p.precio));
+        mostrarProductos();
+    })
+    .catch(() => {
+        Swal.fire({
+            title: "Error",
+            text: "No se pudieron cargar los productos.",
+            icon: "error",
+            confirmButtonColor: "#9c27b0"
+        });
+    });
+
+// 3. Inicialización del carrito
 let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
 // 4. Captura de elementos del DOM
@@ -36,7 +51,6 @@ const btnConfirmarPago = document.getElementById("btn-confirmar-pago");
 
 // 5. FUNCIONES
 
-// Función para mostrar los productos en la página
 function mostrarProductos() {
     contenedorProds.innerHTML = "";
 
@@ -57,19 +71,28 @@ function mostrarProductos() {
     });
 }
 
-// Función para agregar al carrito
 function agregarAlCarrito(id) {
     const productoSeleccionado = productos.find(p => p.id === id);
     carrito.push(productoSeleccionado);
     actualizarCarrito();
+
+    // Toastify notificación
+    Toastify({
+        text: `${productoSeleccionado.nombre} agregado al carrito`,
+        duration: 2000,
+        gravity: "top",
+        position: "right",
+        style: {
+            background: "#9c27b0",
+        }
+    }).showToast();
 }
 
-// Función para dibujar el carrito y sumar el total
 function actualizarCarrito() {
     listaCarrito.innerHTML = "";
     let acumulado = 0;
 
-    carrito.forEach((prod) => {
+    carrito.forEach(prod => {
         const li = document.createElement("li");
         li.innerText = `${prod.nombre} - $${prod.precio}`;
         listaCarrito.appendChild(li);
@@ -80,71 +103,88 @@ function actualizarCarrito() {
     localStorage.setItem("carrito", JSON.stringify(carrito));
 }
 
-// 6. EVENTOS DE BOTONES DE ACCIÓN
+// 6. EVENTOS
 
-// Vaciar carrito
 btnVaciar.addEventListener("click", () => {
     carrito = [];
     actualizarCarrito();
     localStorage.removeItem("carrito");
-    mensajeBienvenida.innerText = "Carrito vacío. ¡Sigue comprando en Araperful!";
+
+    Swal.fire({
+        title: "Carrito vaciado",
+        text: "Tu carrito fue vaciado correctamente.",
+        icon: "info",
+        confirmButtonColor: "#9c27b0"
+    });
 });
 
-// Finalizar compra (Avisa que debe pagar)
 btnFinalizar.addEventListener("click", () => {
     if (carrito.length > 0) {
         mensajeBienvenida.innerText = "¡Pedido listo! Por favor, selecciona el botón Pagar debajo.";
     } else {
-        mensajeBienvenida.innerText = "El carrito está vacío.";
+        Swal.fire({
+            title: "Carrito vacío",
+            text: "Agrega productos antes de finalizar la compra.",
+            icon: "warning",
+            confirmButtonColor: "#9c27b0"
+        });
     }
 });
 
-// Mostrar opciones de pago
 btnPagar.addEventListener("click", () => {
     if (carrito.length > 0) {
         divOpcionesPago.style.display = "block";
         btnPagar.style.display = "none";
     } else {
-        mensajeBienvenida.innerText = "El carrito está vacío.";
+        Swal.fire({
+            title: "Carrito vacío",
+            text: "Agrega productos antes de pagar.",
+            icon: "warning",
+            confirmButtonColor: "#9c27b0"
+        });
     }
 });
 
-// Confirmar el pago final
 btnConfirmarPago.addEventListener("click", () => {
     const seleccion = document.querySelector('input[name="metodo"]:checked');
 
     if (seleccion) {
         const metodo = seleccion.value;
-        const totalActual = totalPrecio.innerText;
+        let totalActual = parseFloat(totalPrecio.innerText);
 
-        // Limpieza de datos
+        // Aplicar descuento si es efectivo
+        if (metodo === "Efectivo") {
+            totalActual = totalActual * 0.9;
+        }
+
+        const fecha = DateTime.now().toLocaleString(DateTime.DATETIME_SHORT);
+
         carrito = [];
         localStorage.removeItem("carrito");
-        actualizarCarrito(); // Ahora el nombre coincide con la función
+        actualizarCarrito();
 
-        // Reset de interfaz
         divOpcionesPago.style.display = "none";
         btnPagar.style.display = "inline-block";
         seleccion.checked = false;
 
-        // Feedback visual
-        mensajeBienvenida.style.color = "green";
-        mensajeBienvenida.style.fontWeight = "bold";
-        mensajeBienvenida.innerText = `¡Pago exitoso con ${metodo}! Total: $${totalActual}. ¡Gracias por tu compra!`;
+        Swal.fire({
+            title: "¡Compra realizada!",
+            text: `Pagaste $${totalActual.toFixed(2)} con ${metodo} el ${fecha}`,
+            icon: "success",
+            confirmButtonColor: "#9c27b0"
+        });
 
-        // Volver al estado normal después de 5 segundos
-        setTimeout(() => {
-            mensajeBienvenida.style.color = "#7b1fa2";
-            mensajeBienvenida.style.fontWeight = "normal";
-            mensajeBienvenida.innerText = "Bienvenido a Araperful. Selecciona los productos que desees agregar al carrito.";
-        }, 5000);
+        mensajeBienvenida.innerText = "Bienvenido a Araperful. Selecciona los productos que desees agregar al carrito.";
 
     } else {
-        mensajeBienvenida.style.color = "red";
-        mensajeBienvenida.innerText = "Por favor, selecciona un método de pago.";
+        Swal.fire({
+            title: "Selecciona un método de pago",
+            text: "Debes elegir una opción antes de continuar.",
+            icon: "warning",
+            confirmButtonColor: "#9c27b0"
+        });
     }
 });
 
 // 7. EJECUCIÓN INICIAL
-mostrarProductos();
 actualizarCarrito();
